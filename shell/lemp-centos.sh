@@ -95,7 +95,7 @@ if [ "$show_verbose" = true ]; then
 fi
 
 if [[ "$platform_info" != "CentOS" ]]; then
-    printf "${LIGHTRED}[ERR] This script can be run under CentOS OS ${NOCOLOR}\n"
+    printf "${LIGHTRED}[ERR] This script can be run under CentOS ${NOCOLOR}\n"
     exit
 fi
 

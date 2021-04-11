@@ -21,19 +21,12 @@ LIGHTPURPLE='\033[1;35m'
 LIGHTCYAN='\033[1;36m'
 WHITE='\033[1;37m'
 
-show_verbose=true
-install_php_56=true
-install_php_70=true
-install_php_71=true
-install_php_72=true
-install_php_73=true
-install_php_74=true
-install_php_80=true
+svhostname="hostname.tld"
 
 
-printf "${YELLOW}#################################################${NOCOLOR}\n"
-printf "${YELLOW}# Debian & Ubuntu Webserver Setup Script * v1.2 #${NOCOLOR}\n"
-printf "${YELLOW}#################################################${NOCOLOR}\n"
+printf "${YELLOW}###########################${NOCOLOR}\n"
+printf "${YELLOW}# Virtualmin Setup Script #${NOCOLOR}\n"
+printf "${YELLOW}###########################${NOCOLOR}\n"
 
 
 ##
@@ -118,7 +111,7 @@ elif [[ "$platform_info" == *"Ubuntu"* ]]; then
 fi
 
 if [[ "$OS" != "Debian" ]] && [[ "$OS" != "Ubuntu" ]]; then
-    printf "${LIGHTRED}[ERR] This script can be run under debian or ubuntu ${NOCOLOR}\n"
+    printf "${LIGHTRED}[ERR] This script can be run under Debian or Ubuntu ${NOCOLOR}\n"
     exit
 fi
 
@@ -150,170 +143,16 @@ fi
 
 
 ##
-## Install Nginx
+## Install virtualmin (minimal, LAMP)
 ##
-if ask "Install Nginx?" Y; then
-    wget -q https://nginx.org/keys/nginx_signing.key -O- | apt-key add -
+if ask "Install virtualmin (minimal, LAMP)?" Y; then
+    wget http://software.virtualmin.com/gpl/scripts/install.sh
+    /bin/sh ./install.sh --minimal --bundle LAMP --hostname "${svhostname}"
 
-    # install nginx from stable repo
-    if [[ "$OS" == "Debian" ]]; then
-        cat > /etc/apt/sources.list.d/nginx.list <<EOF
-deb [arch=amd64] https://nginx.org/packages/debian/ $(lsb_release -sc) nginx
-deb-src https://nginx.org/packages/debian/ $(lsb_release -sc) nginx
-EOF
-    elif [[ "$OS" == "Ubuntu" ]]; then
-        cat > /etc/apt/sources.list.d/nginx.list <<EOF
-deb [arch=amd64] https://nginx.org/packages/ubuntu/ $(lsb_release -sc) nginx
-deb-src https://nginx.org/packages/ubuntu/ $(lsb_release -sc) nginx
-EOF
-    fi
-
-    apt-get remove nginx-common -y
-    apt-get update -y
-    apt-get install nginx -y
-    systemctl restart nginx
-fi
-
-
-##
-## Setup fastcgi_params and create required folders
-##
-if ask "Setup fastcgi_params and create required folders?" Y; then
-    # as we installed nginx from the source, some folders like snippets or /var/www not exist
-    [[ -d /etc/nginx/snippets ]] || mkdir /etc/nginx/snippets
-    [[ -d /var/www ]] || mkdir /var/www
-
-    # chown -R nginx:nginx /var/www
-
-    cat > /etc/nginx/fastcgi_params << EOF
-# regex to split \$uri to \$fastcgi_script_name and \$fastcgi_path
-fastcgi_split_path_info ^(.+\.php)($|/.*);
-
-# Bypass the fact that try_files resets \$fastcgi_path_info
-# see: http://trac.nginx.org/nginx/ticket/321
-set \$path_info \$fastcgi_path_info;
-
-# Check that the PHP script exists before passing it
-try_files \$fastcgi_script_name =404;
-
-fastcgi_index index.php;
-
-fastcgi_param    QUERY_STRING           \$query_string;
-fastcgi_param    REQUEST_METHOD         \$request_method;
-fastcgi_param    CONTENT_TYPE           \$content_type;
-fastcgi_param    CONTENT_LENGTH         \$content_length;
-
-fastcgi_param    SCRIPT_FILENAME        \$document_root\$fastcgi_script_name;
-fastcgi_param    SCRIPT_NAME            \$fastcgi_script_name;
-fastcgi_param    PATH_INFO              \$path_info;
-fastcgi_param    PATH_TRANSLATED        \$document_root\$fastcgi_script_name;
-fastcgi_param    REQUEST_URI            \$request_uri;
-fastcgi_param    DOCUMENT_URI           \$document_uri;
-fastcgi_param    DOCUMENT_ROOT          \$document_root;
-fastcgi_param    SERVER_PROTOCOL        \$server_protocol;
-
-fastcgi_param    GATEWAY_INTERFACE      CGI/1.1;
-fastcgi_param    SERVER_SOFTWARE        nginx/\$nginx_version;
-
-fastcgi_param    REMOTE_ADDR            \$remote_addr;
-fastcgi_param    REMOTE_PORT            \$remote_port;
-fastcgi_param    SERVER_ADDR            \$server_addr;
-fastcgi_param    SERVER_PORT            \$server_port;
-fastcgi_param    SERVER_NAME            \$server_name;
-
-fastcgi_param    HTTPS                  \$https;
-
-fastcgi_param    REDIRECT_STATUS        200;
-EOF
-fi
-
-
-##
-## Install Default SSL Cert and dhparams for Nginx
-##
-if ask "Install Default SSL Cert and dhparams for Nginx?" Y; then
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-        -subj "/C=US/ST=State/L=Locality/O=Organization/OU=IT Department/CN=example.com" \
-        -keyout /etc/ssl/private/nginx-selfsigned.key \
-        -out /etc/ssl/certs/nginx-selfsigned.crt
-
-    # Diffie-Hellman parameter for DHE ciphersuites
-    openssl dhparam -out /etc/nginx/dhparam.pem 4096
-
-    cat > /etc/nginx/snippets/self-signed.conf <<EOF
-ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
-ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
-EOF
-
-    cat > /etc/nginx/snippets/ssl-params.conf <<EOF
-ssl_dhparam /etc/nginx/dhparam.pem;
-
-ssl_protocols TLSv1.2 TLSv1.3;
-ssl_ciphers 'TLS13+AESGCM+AES128:EECDH+AES128';
-ssl_prefer_server_ciphers off;
-ssl_ecdh_curve X25519:sect571r1:secp521r1:secp384r1;
-
-ssl_session_timeout  10m;
-ssl_session_cache shared:SSL:10m;
-ssl_session_tickets off;
-
-ssl_stapling on;
-ssl_stapling_verify on;
-
-resolver 1.1.1.1 1.0.0.1 [2606:4700:4700::1111] [2606:4700:4700::1001] valid=300s;
-resolver_timeout 5s;
-EOF
-fi
-
-
-##
-## Hide nginx version number and activate SSL in default Nginx server
-##
-if ask "Hide nginx version number and activate SSL in default Nginx server?" Y; then
-
-    sed -i "/server_name .*;/alisten 443 ssl http2;\nlisten [::]:443 ssl http2;\nproxy_pass_header Server;\nserver_tokens off;\ninclude snippets/self-signed.conf;\ninclude snippets/ssl-params.conf;" /etc/nginx/conf.d/default.conf
-
-    nginx -t
-    systemctl restart nginx
-fi
-
-
-##
-## Install ufw
-##
-if ask "Install ufw?" Y; then
-    apt-get install ufw -y
-    ufw default deny incoming
-    ufw default allow outgoing
-    ufw allow ssh
-    ufw allow 80/tcp
-    ufw allow 443/tcp
-
-    yes y | ufw enable
-
-    if [ "$show_verbose" = true ]; then
-        printf "${LIGHTCYAN}[INFO] ufw status verbose: ${NOCOLOR}\n"
-        ufw status verbose
-    fi
-fi
-
-
-##
-## Install MariaDB
-##
-if ask "Install MariaDB?" Y; then
-    GEN_PWD=$(date +%s|sha256sum|base64|head -c 32)
-
-    export DEBIAN_FRONTEND="noninteractive"
-
-    debconf-set-selections <<< "mariadb-server mysql-server/root_password password $GEN_PWD"
-    debconf-set-selections <<< "mariadb-server mysql-server/root_password_again password $GEN_PWD"
-
-    apt-get install mariadb-server -y
-
-    export DEBIAN_FRONTEND="dialog"
-
-    printf "${LIGHTCYAN}[INFO] PLEASE NOTE IT SECURELY, Generated random MariaDB root pass: $GEN_PWD ${NOCOLOR}\n"
+    printf "${LIGHTCYAN}[INFO] Generating webmin root password ${NOCOLOR}\n"
+    randpass=$(randpass)
+    echo "webmin root user password: ${randpass}"
+    /usr/share/webmin/changepass.pl /etc/webmin root "$randpass"
 fi
 
 
@@ -520,86 +359,21 @@ fi
 
 
 ##
-## Install vsftpd
+## Enable PHP-FPM, mpm_event, http2 and apache mod headers
 ##
-if ask "Install vsftpd?" Y; then
-    apt-get install vsftpd -y
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-        -subj "/C=US/ST=State/L=Locality/O=Organization/OU=IT Department/CN=example.com" \
-        -keyout /etc/ssl/private/vsftpd.pem \
-        -out /etc/ssl/private/vsftpd.pem
+if ask "Enable PHP-FPM, mpm_event, http2 and apache mod headers?" Y; then
+    a2dismod php8.0
+    a2enconf php8.0-fpm
+    a2enmod proxy_fcgi
 
-    cp /etc/vsftpd.conf /etc/vsftpd.conf.orig
+    systemctl restart apache2
 
-    sed -i "s/#write_enable=YES/write_enable=YES/" /etc/vsftpd.conf
-    sed -i "s@rsa_cert_file=.*@# rsa_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem@" /etc/vsftpd.conf
-    sed -i "s@rsa_private_key_file=.*@# rsa_private_key_file=/etc/ssl/private/ssl-cert-snakeoil.key@" /etc/vsftpd.conf
-    sed -i "s/ssl_enable=NO/# ssl_enable=NO/" /etc/vsftpd.conf
+    a2dismod mpm_prefork
+    a2enmod mpm_event
 
-    tee -a /etc/vsftpd.conf << END
-# Important! Proper umask for uploaded files.
-local_umask=022
-file_open_mode=0666
+    a2enmod http2
+    systemctl restart apache2
 
-# restrict user to home dir
-chroot_local_user=YES
-user_sub_token=\$USER
-local_root=/etc/vsftpd/users/\$USER
-
-# Enable SSL
-rsa_cert_file=/etc/ssl/private/vsftpd.pem
-rsa_private_key_file=/etc/ssl/private/vsftpd.pem
-ssl_enable=YES
-allow_anon_ssl=NO
-force_local_data_ssl=YES
-force_local_logins_ssl=YES
-ssl_tlsv1=NO
-ssl_sslv2=NO
-ssl_sslv3=NO
-require_ssl_reuse=NO
-# ssl_ciphers=HIGH
-ssl_ciphers=ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256
-
-# Enable passive transferring mode
-pasv_enable=YES
-pasv_min_port=62100
-pasv_max_port=62500
-port_enable=YES
-
-# Show hidden files for FTP client
-force_dot_files=YES
-END
-
-    ufw allow 20/tcp
-    ufw allow 21/tcp
-    ufw allow 989/tcp
-    ufw allow 990/tcp
-    ufw allow 62100:62500/tcp
-    if [ "$show_verbose" = true ]; then
-        printf "${LIGHTCYAN}[INFO] ufw status verbose: ${NOCOLOR}\n"
-        ufw status verbose
-    fi
-
-    systemctl restart vsftpd
-
-    if [ "$show_verbose" = true ]; then
-        printf "${LIGHTCYAN}[INFO] systemctl status vsftpd: ${NOCOLOR}\n"
-        systemctl status vsftpd
-
-        printf "${LIGHTCYAN}[INFO] vsftp error check (if any): ${NOCOLOR}\n"
-        journalctl | grep -i vsftp
-    fi
+    a2enmod headers
+    systemctl restart apache2
 fi
-
-
-##
-## Install Composer
-##
-if ask "Install Composer?" Y; then
-    curl -sS https://getcomposer.org/installer | php
-    mv composer.phar /usr/local/bin/composer
-fi
-
-
-printf "${LIGHTCYAN}Installation finished. ${NOCOLOR}\n"
-exit
