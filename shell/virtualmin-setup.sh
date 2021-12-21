@@ -30,6 +30,7 @@ install_php_72=true
 install_php_73=true
 install_php_74=true
 install_php_80=true
+install_php_81=true
 
 
 printf "${YELLOW}###########################${NOCOLOR}\n"
@@ -304,8 +305,26 @@ if ask "Install Multiple PHP Versions?" Y; then
 
         printf "[curl]\n" | tee -a /etc/php/8.0/fpm/php.ini
         printf "curl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/8.0/fpm/php.ini
+    fi
 
-        update-alternatives --set php /usr/bin/php8.0
+    if [ "$install_php_81" = true ]; then
+        apt-get install -y \
+        php8.1 php8.1-bcmath php8.1-bz2 php8.1-common php8.1-curl php8.1-fpm php8.1-gd php8.1-gmp php8.1-imap \
+        php8.1-intl php8.1-mbstring php8.1-mysql php8.1-odbc php8.1-opcache php8.1-pgsql php8.1-soap php8.1-sqlite3 \
+        php8.1-xml php8.1-zip
+
+        sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/8.1/fpm/php.ini
+        sed -i "s/memory_limit = .*/memory_limit = 256M/" /etc/php/8.1/fpm/php.ini
+        sed -i "s/upload_max_filesize = .*/upload_max_filesize = 100M/" /etc/php/8.1/fpm/php.ini
+        sed -i "s/post_max_size = .*/post_max_size = 100M/" /etc/php/8.1/fpm/php.ini
+
+        printf "[openssl]\n" | tee -a /etc/php/8.1/fpm/php.ini
+        printf "openssl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/8.1/fpm/php.ini
+
+        printf "[curl]\n" | tee -a /etc/php/8.1/fpm/php.ini
+        printf "curl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/8.1/fpm/php.ini
+
+        update-alternatives --set php /usr/bin/php8.1
     fi
 fi
 
@@ -363,6 +382,13 @@ if ask "Restart PHPs?" Y; then
             systemctl status php8.0-fpm
         fi
     fi
+    if [ "$install_php_81" = true ]; then
+        systemctl restart php8.1-fpm
+        if [ "$show_verbose" = true ]; then
+            printf "${LIGHTCYAN}[INFO] systemctl status php8.1-fpm: ${NOCOLOR}\n"
+            systemctl status php8.1-fpm
+        fi
+    fi
 fi
 
 
@@ -370,8 +396,8 @@ fi
 ## Enable PHP-FPM, mpm_event, http2 and apache mod headers
 ##
 if ask "Enable PHP-FPM, mpm_event, http2 and apache mod headers?" Y; then
-    a2dismod php8.0
-    a2enconf php8.0-fpm
+    a2dismod php8.1
+    a2enconf php8.1-fpm
     a2enmod proxy_fcgi
 
     systemctl restart apache2
