@@ -22,6 +22,14 @@ LIGHTCYAN='\033[1;36m'
 WHITE='\033[1;37m'
 
 svhostname="hostname.tld"
+show_verbose=true
+install_php_56=true
+install_php_70=true
+install_php_71=true
+install_php_72=true
+install_php_73=true
+install_php_74=true
+install_php_80=true
 
 
 printf "${YELLOW}###########################${NOCOLOR}\n"
