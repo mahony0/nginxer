@@ -184,8 +184,8 @@ if ask "Install Multiple PHP Versions?" Y; then
     if [ "$install_php_56" = true ]; then
         apt-get install -y \
         php5.6 php5.6-bcmath php5.6-bz2 php5.6-common php5.6-curl php5.6-fpm php5.6-gd php5.6-gmp php5.6-imap \
-        php5.6-intl php5.6-mbstring php5.6-mysql php5.6-odbc php5.6-opcache php5.6-pgsql php5.6-soap php5.6-sqlite3 \
-        php5.6-xml php5.6-zip php5.6-json php5.6-mcrypt
+        php5.6-intl php5.6-mbstring php5.6-mysql php5.6-odbc php5.6-opcache php5.6-pgsql php5.6-redis php5.6-soap \
+        php5.6-sqlite3 php5.6-xml php5.6-zip php5.6-json php5.6-mcrypt
 
         sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/5.6/fpm/php.ini
         sed -i "s/memory_limit = .*/memory_limit = 256M/" /etc/php/5.6/fpm/php.ini
@@ -202,8 +202,8 @@ if ask "Install Multiple PHP Versions?" Y; then
     if [ "$install_php_70" = true ]; then
         apt-get install -y \
         php7.0 php7.0-bcmath php7.0-bz2 php7.0-common php7.0-curl php7.0-fpm php7.0-gd php7.0-gmp php7.0-imap \
-        php7.0-intl php7.0-mbstring php7.0-mysql php7.0-odbc php7.0-opcache php7.0-pgsql php7.0-soap php7.0-sqlite3 \
-        php7.0-xml php7.0-zip php7.0-json php7.0-mcrypt
+        php7.0-intl php7.0-mbstring php7.0-mysql php7.0-odbc php7.0-opcache php7.0-pgsql php7.0-redis php7.0-soap \
+        php7.0-sqlite3 php7.0-xml php7.0-zip php7.0-json php7.0-mcrypt
 
         sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.0/fpm/php.ini
         sed -i "s/memory_limit = .*/memory_limit = 256M/" /etc/php/7.0/fpm/php.ini
@@ -220,8 +220,8 @@ if ask "Install Multiple PHP Versions?" Y; then
     if [ "$install_php_71" = true ]; then
         apt-get install -y \
         php7.1 php7.1-bcmath php7.1-bz2 php7.1-common php7.1-curl php7.1-fpm php7.1-gd php7.1-gmp php7.1-imap \
-        php7.1-intl php7.1-mbstring php7.1-mysql php7.1-odbc php7.1-opcache php7.1-pgsql php7.1-soap php7.1-sqlite3 \
-        php7.1-xml php7.1-zip php7.1-json php7.1-mcrypt
+        php7.1-intl php7.1-mbstring php7.1-mysql php7.1-odbc php7.1-opcache php7.1-pgsql php7.1-redis php7.1-soap \
+        php7.1-sqlite3 php7.1-xml php7.1-zip php7.1-json php7.1-mcrypt
 
         sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.1/fpm/php.ini
         sed -i "s/memory_limit = .*/memory_limit = 256M/" /etc/php/7.1/fpm/php.ini
@@ -238,8 +238,8 @@ if ask "Install Multiple PHP Versions?" Y; then
     if [ "$install_php_72" = true ]; then
         apt-get install -y \
         php7.2 php7.2-bcmath php7.2-bz2 php7.2-common php7.2-curl php7.2-fpm php7.2-gd php7.2-gmp php7.2-imap \
-        php7.2-intl php7.2-mbstring php7.2-mysql php7.2-odbc php7.2-opcache php7.2-pgsql php7.2-soap php7.2-sqlite3 \
-        php7.2-xml php7.2-zip php7.2-json
+        php7.2-intl php7.2-mbstring php7.2-mysql php7.2-odbc php7.2-opcache php7.2-pgsql php7.2-redis php7.2-soap \
+        php7.2-sqlite3 php7.2-xml php7.2-zip php7.2-json
 
         sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.2/fpm/php.ini
         sed -i "s/memory_limit = .*/memory_limit = 256M/" /etc/php/7.2/fpm/php.ini
@@ -256,8 +256,8 @@ if ask "Install Multiple PHP Versions?" Y; then
     if [ "$install_php_73" = true ]; then
         apt-get install -y \
         php7.3 php7.3-bcmath php7.3-bz2 php7.3-common php7.3-curl php7.3-fpm php7.3-gd php7.3-gmp php7.3-imap \
-        php7.3-intl php7.3-mbstring php7.3-mysql php7.3-odbc php7.3-opcache php7.3-pgsql php7.3-soap php7.3-sqlite3 \
-        php7.3-xml php7.3-zip php7.3-json
+        php7.3-intl php7.3-mbstring php7.3-mysql php7.3-odbc php7.3-opcache php7.3-pgsql php7.3-redis php7.3-soap \
+        php7.3-sqlite3 php7.3-xml php7.3-zip php7.3-json
 
         sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.3/fpm/php.ini
         sed -i "s/memory_limit = .*/memory_limit = 256M/" /etc/php/7.3/fpm/php.ini
@@ -274,8 +274,8 @@ if ask "Install Multiple PHP Versions?" Y; then
     if [ "$install_php_74" = true ]; then
         apt-get install -y \
         php7.4 php7.4-bcmath php7.4-bz2 php7.4-common php7.4-curl php7.4-fpm php7.4-gd php7.4-gmp php7.4-imap \
-        php7.4-intl php7.4-mbstring php7.4-mysql php7.4-odbc php7.4-opcache php7.4-pgsql php7.4-soap php7.4-sqlite3 \
-        php7.4-xml php7.4-zip php7.4-json
+        php7.4-intl php7.4-mbstring php7.4-mysql php7.4-odbc php7.4-opcache php7.4-pgsql php7.4-redis php7.4-soap \
+        php7.4-sqlite3 php7.4-xml php7.4-zip php7.4-json
 
         sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.4/fpm/php.ini
         sed -i "s/memory_limit = .*/memory_limit = 256M/" /etc/php/7.4/fpm/php.ini
@@ -292,8 +292,8 @@ if ask "Install Multiple PHP Versions?" Y; then
     if [ "$install_php_80" = true ]; then
         apt-get install -y \
         php8.0 php8.0-bcmath php8.0-bz2 php8.0-common php8.0-curl php8.0-fpm php8.0-gd php8.0-gmp php8.0-imap \
-        php8.0-intl php8.0-mbstring php8.0-mysql php8.0-odbc php8.0-opcache php8.0-pgsql php8.0-soap php8.0-sqlite3 \
-        php8.0-xml php8.0-zip
+        php8.0-intl php8.0-mbstring php8.0-mysql php8.0-odbc php8.0-opcache php8.0-pgsql php8.0-redis php8.0-soap \
+        php8.0-sqlite3 php8.0-xml php8.0-zip
 
         sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/8.0/fpm/php.ini
         sed -i "s/memory_limit = .*/memory_limit = 256M/" /etc/php/8.0/fpm/php.ini
@@ -310,8 +310,8 @@ if ask "Install Multiple PHP Versions?" Y; then
     if [ "$install_php_81" = true ]; then
         apt-get install -y \
         php8.1 php8.1-bcmath php8.1-bz2 php8.1-common php8.1-curl php8.1-fpm php8.1-gd php8.1-gmp php8.1-imap \
-        php8.1-intl php8.1-mbstring php8.1-mysql php8.1-odbc php8.1-opcache php8.1-pgsql php8.1-soap php8.1-sqlite3 \
-        php8.1-xml php8.1-zip
+        php8.1-intl php8.1-mbstring php8.1-mysql php8.1-odbc php8.1-opcache php8.1-pgsql php8.1-redis php8.1-soap \
+        php8.1-sqlite3 php8.1-xml php8.1-zip
 
         sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/8.1/fpm/php.ini
         sed -i "s/memory_limit = .*/memory_limit = 256M/" /etc/php/8.1/fpm/php.ini
